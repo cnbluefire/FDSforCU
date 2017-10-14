@@ -1,7 +1,7 @@
-Fluent Design System for Creators Update V0.1
+Fluent Design System for Creators Update V0.2
 ==============
 Fluent Design System for Creators Update(FDS4CU)是一个UWP的资源库，将Windows10 Fall Creators Update(10.0;版本16299)SDK中的部分效果(Acrylic和Reveal)移植到Windows10 15063中。  
-目前支持全部的Acrylic笔刷和Button，ToggleButton，RepeatButton，SemanticZoom，ListView和GridView的Reveal效果。  
+目前支持全部的Acrylic笔刷和Button，ToggleButton，RepeatButton，SemanticZoom，AutoSuggestBox,ComboBox,ListView和GridView的Reveal效果。  
 
 Acrylic笔刷如下(详细参数可见/ResourceDictionarys/ThemeResources.xaml):  
 
@@ -57,16 +57,18 @@ Acrylic笔刷如下(详细参数可见/ResourceDictionarys/ThemeResources.xaml):
 
 ***
 
-Reveal样式如下(详细参数可见/ResourceDictionarys/Styles.xaml，ListView和GridView不需多做处理，其他需要设置Style="...RevealStyle"):  
+Reveal样式如下(详细参数可见/ResourceDictionarys/Styles.xaml，AutoSuggestBox,ComboBox,ListView和GridView不需多做处理，其他需要设置Style="...RevealStyle"):  
 
     ButtonRevealStyle
     RepeatButtonRevealStyle
     ToggleButtonRevealStyle
     SemanticZoomRevealStyle
+    AutoSuggestBoxRevealStyle
+    ComboBoxItemRevealStyle
     ListViewItemRevealStyle
     GridViewItemRevealStyle
 
-自定义控件开启Reveal方式如下(不支持Pupop内的控件):  
+自定义控件开启Reveal方式如下:  
 首先同上引入资源字典，然后编辑UserControl的VisualState:  
 
     <UserControl
