@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI;
 using Windows.UI.Composition;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Hosting;
@@ -48,18 +49,6 @@ namespace FluentDesignSystem.Lights
             SpotLightOffsetAnimation = compositor.CreateExpressionAnimation("Vector3(PropSet.OffsetX ,PropSet.OffsetY ,PropSet.OffsetZ)");
             SpotLightOffsetAnimation.SetReferenceParameter("PropSet", PropSet);
             CompositionLight.StartAnimation("Offset", SpotLightOffsetAnimation);
-
-            if (!StaticValue.IsWindowPointerMoveHandled)
-            {
-                Window.Current.Content.AddHandler(UIElement.PointerMovedEvent, new PointerEventHandler(Border_PointerMoved), true);
-                StaticValue.IsWindowPointerExitedHandled = true;
-            }
-            if (!StaticValue.IsWindowPointerExitedHandled)
-            {
-                Window.Current.Content.AddHandler(UIElement.PointerExitedEvent, new PointerEventHandler(Border_PointerExited), true);
-                StaticValue.IsWindowPointerExitedHandled = true;
-            }
-
             cbEasing = compositor.CreateCubicBezierEasingFunction(new Vector2(0.42f, 0f), new Vector2(1f, 1f));
             line = compositor.CreateLinearEasingFunction();
             var an = compositor.CreateScalarKeyFrameAnimation();
@@ -72,16 +61,6 @@ namespace FluentDesignSystem.Lights
         protected override void OnDisconnected(UIElement oldElement)
         {
             element = null;
-            if (StaticValue.IsWindowPointerMoveHandled)
-            {
-                Window.Current.Content.RemoveHandler(UIElement.PointerMovedEvent, new PointerEventHandler(Border_PointerMoved));
-                StaticValue.IsWindowPointerExitedHandled = false;
-            }
-            if (StaticValue.IsWindowPointerExitedHandled)
-            {
-                Window.Current.Content.RemoveHandler(UIElement.PointerExitedEvent, new PointerEventHandler(Border_PointerExited));
-                StaticValue.IsWindowPointerExitedHandled = false;
-            }
         }
 
         protected override string GetId()
@@ -94,32 +73,52 @@ namespace FluentDesignSystem.Lights
             return typeof(RevealBorderSpotLight).FullName;
         }
 
-        private void Border_PointerMoved(object sender, PointerRoutedEventArgs e)
+        public void SetPosition(Vector2 position)
         {
-            var windowposition = e.GetCurrentPoint(sender as UIElement).Position;
-            var position = (sender as UIElement).TransformToVisual(element).TransformPoint(windowposition).ToVector2();
             PropSet.InsertScalar("OffsetX", position.X);
             PropSet.InsertScalar("OffsetY", position.Y);
         }
 
-        private void Border_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            //if (element is Panel)
-            //{
-            //    if ((element as Grid).BorderBrush == null) return;
-            //    RemoveTargetBrush(GetId(), (element as Grid).BorderBrush);
-            //}
-            //if (element is Border)
-            //{
-            //    if ((element as Border).BorderBrush == null) return;
-            //    RemoveTargetBrush(GetId(), (element as Border).BorderBrush);
-            //}
-            //if (element is Button)
-            //{
-            //    if ((element as Button).BorderBrush == null) return;
-            //    RemoveTargetBrush(GetId(), (element as Button).BorderBrush);
-            //}
-        }
+
+        //private void Border_PointerMoved(object sender, PointerRoutedEventArgs e)
+        //{
+        //    var windowposition = e.GetCurrentPoint(sender as UIElement).Position;
+        //    var position = (sender as UIElement).TransformToVisual(element).TransformPoint(windowposition).ToVector2();
+        //    PropSet.InsertScalar("OffsetX", position.X);
+        //    PropSet.InsertScalar("OffsetY", position.Y);
+        //}
+
+        //private void Border_PointerExited(object sender, PointerRoutedEventArgs e)
+        //{
+        //    //if (element is Panel)
+        //    //{
+        //    //    if ((element as Grid).BorderBrush == null) return;
+        //    //    RemoveTargetBrush(GetId(), (element as Grid).BorderBrush);
+        //    //}
+        //    //if (element is Border)
+        //    //{
+        //    //    if ((element as Border).BorderBrush == null) return;
+        //    //    RemoveTargetBrush(GetId(), (element as Border).BorderBrush);
+        //    //}
+        //    //if (element is Button)
+        //    //{
+        //    //    if ((element as Button).BorderBrush == null) return;
+        //    //    RemoveTargetBrush(GetId(), (element as Button).BorderBrush);
+        //    //}
+        //}
+
+        //private void Border_PointerMoved(CoreWindow sender, PointerEventArgs e)
+        //{
+        //    var position = e.CurrentPoint.Position.ToVector2();
+        //    //var position = Window.Current.Content.TransformToVisual(element).TransformPoint(windowposition).ToVector2();
+        //    PropSet.InsertScalar("OffsetX", position.X);
+        //    PropSet.InsertScalar("OffsetY", position.Y);
+        //}
+
+        //private void Border_PointerExited(CoreWindow sender, PointerEventArgs e)
+        //{
+
+        //}
     }
 
 }

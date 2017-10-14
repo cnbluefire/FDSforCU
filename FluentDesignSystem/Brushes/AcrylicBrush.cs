@@ -105,12 +105,17 @@ namespace FluentDesignSystem.Brushes
             TintToFallBackAnimation.Duration = TimeSpan.FromSeconds(0.1d);
             TintToFallBackAnimation.Target = "tintcolor.Color";
 
-            Window.Current.Activated += Current_Activated;
-            Window.Current.VisibilityChanged += Current_VisibilityChanged;
+            //Window.Current.Activated += Current_Activated;
+            //Window.Current.VisibilityChanged += Current_VisibilityChanged;
+            CoreWindow.GetForCurrentThread().Activated += AcrylicBrush_Activated;
+            CoreWindow.GetForCurrentThread().VisibilityChanged += AcrylicBrush_VisibilityChanged;
         }
+
 
         protected override void OnDisconnected()
         {
+            CoreWindow.GetForCurrentThread().Activated -= AcrylicBrush_Activated;
+            CoreWindow.GetForCurrentThread().VisibilityChanged -= AcrylicBrush_VisibilityChanged;
             CompositionBrush.Dispose();
             CompositionBrush = null;
         }
@@ -149,16 +154,28 @@ namespace FluentDesignSystem.Brushes
             else CompositionBrush = compositor.CreateColorBrush(FallbackColor);
         }
 
-        private void Current_VisibilityChanged(object sender, VisibilityChangedEventArgs e)
+        //private void Current_VisibilityChanged(object sender, VisibilityChangedEventArgs e)
+        //{
+        //    if (BackgroundSource == AcrylicBackgroundSource.Hostbackdrop)
+        //        SetCompositionFocus(e.Visible);
+        //}
+
+        //private void Current_Activated(object sender, WindowActivatedEventArgs e)
+        //{
+        //    if (BackgroundSource == AcrylicBackgroundSource.Hostbackdrop)
+        //        SetCompositionFocus(e.WindowActivationState != CoreWindowActivationState.Deactivated);
+        //}
+
+        private void AcrylicBrush_VisibilityChanged(CoreWindow sender, VisibilityChangedEventArgs args)
         {
             if (BackgroundSource == AcrylicBackgroundSource.Hostbackdrop)
-                SetCompositionFocus(e.Visible);
+                SetCompositionFocus(args.Visible);
         }
 
-        private void Current_Activated(object sender, WindowActivatedEventArgs e)
+        private void AcrylicBrush_Activated(CoreWindow sender, WindowActivatedEventArgs args)
         {
             if (BackgroundSource == AcrylicBackgroundSource.Hostbackdrop)
-                SetCompositionFocus(e.WindowActivationState != CoreWindowActivationState.Deactivated);
+                SetCompositionFocus(args.WindowActivationState != CoreWindowActivationState.Deactivated);
         }
 
         public AcrylicBackgroundSource BackgroundSource

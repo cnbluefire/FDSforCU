@@ -31,10 +31,10 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2*" MinWidth="500" />
+                    <ColumnDefinition Width="4*" MinWidth="300" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Image x:Name="BackgroundImage" Opacity="0.6" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Source="/Assets/RevealBackgroundImage.png" Stretch="UniformToFill" />
+                <Image x:Name="BackgroundImage" Opacity="0.2" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Source="/Assets/RevealBackgroundImage.png" Stretch="UniformToFill" />
                 <StackPanel x:Name="mainStackPanel" Margin="0,122" Grid.Column="1">
                     <TextBlock FontSize="18" TextWrapping="Wrap" Margin="5">
                         <Run Text="&quot;展示&quot;是一种灯光效果，有助于重点深入了解应用的交互式元素。" />
@@ -45,9 +45,17 @@
                         <ToggleButton Content="ToggleButton" Padding="20" Margin="10" Style="{StaticResource ToggleButtonRevealStyle}" />
                         <RepeatButton Content="RepeatButton" Padding="20" Margin="10" Style="{StaticResource RepeatButtonRevealStyle}" />
                     </StackPanel>
-                    <TextBlock TextWrapping="Wrap" Text="ListView和GridView默认开启了展示效果" />
-                    <ListView ItemsSource="{x:Bind Lists}" />
-                    <GridView ItemsSource="{x:Bind Lists}" />
+                    <TextBlock Margin="10"  TextWrapping="Wrap" Text="AutoSuggestBox、Combobox、ListView和GridView默认开启了展示效果" />
+                    <AutoSuggestBox x:Name="autoSuggestBox" Margin="10" TextChanged="autoSuggestBox_TextChanged" SuggestionChosen="autoSuggestBox_SuggestionChosen" />
+                    <ComboBox x:Name="comboBox" Margin="10"  ItemsSource="{x:Bind Lists}" ItemContainerStyle="{StaticResource ComboBoxItemRevealStyle}" />
+                    <ListView Margin="10"  ItemsSource="{x:Bind Lists}" />
+                    <GridView Margin="10"  ItemsSource="{x:Bind Lists}">
+                        <GridView.ItemTemplate>
+                            <DataTemplate>
+                                <Image Width="200" Height="200" Source="{Binding }" Stretch="UniformToFill" />
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
                 </StackPanel>
             </Grid>
         </ScrollViewer>

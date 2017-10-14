@@ -64,7 +64,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="2*" MinWidth="500" />
+                    <ColumnDefinition Width="4*" MinWidth="300" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Image x:Name="BackgroundImage" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Center" Source="/Assets/AcrylicBackgroundImage.jpg" Stretch="UniformToFill" />

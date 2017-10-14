@@ -18,11 +18,16 @@ namespace FluentDesignSystem.Lights
 {
     public class RevealContentSpotLight : XamlLight
     {
+        public bool IsConnected
+        {
+            get => compositor != null;
+        }
+
         UIElement element;
         Compositor compositor;
         CubicBezierEasingFunction cbEasing;
         LinearEasingFunction line;
-        CompositionPropertySet PropSet;
+        public CompositionPropertySet PropSet;
         ExpressionAnimation SpotLightOffsetAnimation;
         ExpressionAnimation LinearAttenuationAnimation;
         ColorKeyFrameAnimation ReleasedInnerConeColorAnimation;
@@ -53,8 +58,8 @@ namespace FluentDesignSystem.Lights
             SpotLightOffsetAnimation.SetReferenceParameter("PropSet", PropSet);
             CompositionLight.StartAnimation("Offset", SpotLightOffsetAnimation);
 
-            newElement.AddHandler(UIElement.PointerMovedEvent, new PointerEventHandler(Content_PointerMoved), true);
-            newElement.AddHandler(UIElement.PointerExitedEvent, new PointerEventHandler(Content_PointerExited), true);
+            //newElement.AddHandler(UIElement.PointerMovedEvent, new PointerEventHandler(Content_PointerMoved), true);
+            //newElement.AddHandler(UIElement.PointerExitedEvent, new PointerEventHandler(Content_PointerExited), true);
             //newElement.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(Content_PointerPressed), true);
             //newElement.AddHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(Content_PointerReleased), true);
 
@@ -92,10 +97,26 @@ namespace FluentDesignSystem.Lights
 
         protected override void OnDisconnected(UIElement oldElement)
         {
-            oldElement.RemoveHandler(UIElement.PointerMovedEvent, new PointerEventHandler(Content_PointerMoved));
-            oldElement.RemoveHandler(UIElement.PointerExitedEvent, new PointerEventHandler(Content_PointerExited));
+            //oldElement.RemoveHandler(UIElement.PointerMovedEvent, new PointerEventHandler(Content_PointerMoved));
+            //oldElement.RemoveHandler(UIElement.PointerExitedEvent, new PointerEventHandler(Content_PointerExited));
             //oldElement.RemoveHandler(UIElement.PointerPressedEvent, new PointerEventHandler(Content_PointerPressed));
             //oldElement.RemoveHandler(UIElement.PointerReleasedEvent, new PointerEventHandler(Content_PointerReleased));
+        }
+
+        protected override string GetId()
+        {
+            return GetIdStatic();
+        }
+
+        public static string GetIdStatic()
+        {
+            return typeof(RevealContentSpotLight).FullName;
+        }
+
+        public void SetPosition(Vector2 position)
+        {
+            PropSet.InsertScalar("OffsetX", position.X);
+            PropSet.InsertScalar("OffsetY", position.Y);
         }
 
         void ContentPressed()
@@ -114,15 +135,7 @@ namespace FluentDesignSystem.Lights
             PropSet.StartAnimation("OffsetZ", ReleasedPropSetOffsetZAnimation);
         }
 
-        protected override string GetId()
-        {
-            return GetIdStatic();
-        }
 
-        public static string GetIdStatic()
-        {
-            return typeof(RevealContentSpotLight).FullName;
-        }
 
         public bool IsPressedEnable
         {
@@ -134,11 +147,11 @@ namespace FluentDesignSystem.Lights
         public static readonly DependencyProperty IsPressedEnableProperty =
             DependencyProperty.Register("IsPressedEnable", typeof(bool), typeof(RevealContentSpotLight), new PropertyMetadata(false, (s, a) =>
             {
-                if(a.NewValue != a.OldValue)
+                if (a.NewValue != a.OldValue)
                 {
                     var isPressEnable = (bool)a.NewValue;
                     var sender = s as RevealContentSpotLight;
-                    if(isPressEnable) sender.ContentPressed();
+                    if (isPressEnable) sender.ContentPressed();
                     else sender.ContentReleased();
                 }
             }));
@@ -146,31 +159,30 @@ namespace FluentDesignSystem.Lights
 
 
 
-        private void Content_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-            var position = e.GetCurrentPoint(sender as UIElement).Position.ToVector2();
-            PropSet.InsertScalar("OffsetX", position.X);
-            PropSet.InsertScalar("OffsetY", position.Y);
-        }
+        //private void Content_PointerMoved(object sender, PointerRoutedEventArgs e)
+        //{
+        //    var position = e.GetCurrentPoint(sender as UIElement).Position.ToVector2();
+        //    PropSet.InsertScalar("OffsetX", position.X);
+        //    PropSet.InsertScalar("OffsetY", position.Y);
+        //}
 
-        private void Content_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            if (Window.Current.Content.Lights.Count != 0)
-            {
-                Window.Current.Content.Lights.Clear();
-            }
-        }
+        //private void Content_PointerExited(object sender, PointerRoutedEventArgs e)
+        //{
+        //    if (Window.Current.Content.Lights.Count != 0)
+        //    {
+        //        Window.Current.Content.Lights.Clear();
+        //    }
+        //}
 
 
-        private void Content_PointerReleased(object sender, PointerRoutedEventArgs e)
-        {
-            ContentReleased();
-        }
+        //private void Content_PointerReleased(object sender, PointerRoutedEventArgs e)
+        //{
+        //    ContentReleased();
+        //}
 
-        private void Content_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-            ContentPressed();
-        }
-
+        //private void Content_PointerPressed(object sender, PointerRoutedEventArgs e)
+        //{
+        //    ContentPressed();
+        //}
     }
 }

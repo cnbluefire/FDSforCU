@@ -27,19 +27,17 @@ namespace FDSforCU.Views
         public RevealPage()
         {
             this.InitializeComponent();
-            Lists = new ObservableCollection<string>();
-            Lists.Add("1");
-            Lists.Add("2");
-            Lists.Add("3");
-            Lists.Add("4");
-            Lists.Add("5");
-            Lists.Add("6");
-            Lists.Add("7");
-            Lists.Add("8");
-            Lists.Add("9");
+            Lists = new ObservableCollection<Uri>();
+            Lists.Add(new Uri("ms-appx:///Assets/Images/1.jpg"));
+            Lists.Add(new Uri("ms-appx:///Assets/Images/2.jpg"));
+            Lists.Add(new Uri("ms-appx:///Assets/Images/3.jpg"));
+            Lists.Add(new Uri("ms-appx:///Assets/Images/4.jpg"));
+            Lists.Add(new Uri("ms-appx:///Assets/Images/5.jpg"));
+            Suggestions = new ObservableCollection<string>();
         }
 
-        public ObservableCollection<string> Lists { get; private set; }
+        public ObservableCollection<Uri> Lists { get; private set; }
+        public ObservableCollection<string> Suggestions { get; private set; }
 
         private void ToggleSwitch_Loaded(object sender, RoutedEventArgs e)
         {
@@ -73,6 +71,27 @@ namespace FDSforCU.Views
             pVisual.StartAnimation("TransformMatrix", pAnimation);
         }
 
+        private void autoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+            {
+                Suggestions.Clear();
+                foreach(var item in Lists)
+                {
+                    if (item.ToString().Contains(sender.Text))
+                        Suggestions.Add(item.ToString());
+                }
+                sender.ItemsSource = Suggestions;
+            }
+        }
 
+        private void autoSuggestBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+        {
+            foreach (var item in Lists)
+            {
+                if (item.ToString() == args.SelectedItem.ToString())
+                    comboBox.SelectedItem = item;
+            }
+        }
     }
 }

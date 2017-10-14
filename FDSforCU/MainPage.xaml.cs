@@ -36,10 +36,6 @@ namespace FDSforCU
             ButtomMenuList.Add(new MainPageModel() { Title = "关于", PageType = typeof(AboutPage) });
             selectedModel = new MainPageModel();
 
-            CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
-            ApplicationViewTitleBar titleBar = ApplicationView.GetForCurrentView().TitleBar;
-            titleBar.ButtonBackgroundColor = Colors.Transparent;
-            titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         }
         MainPageModel selectedModel;
         ObservableCollection<MainPageModel> HamburgerMenuList = new ObservableCollection<MainPageModel>();
@@ -76,6 +72,21 @@ namespace FDSforCU
             if (sender is ListView listView)
             {
                 await listView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () => listView.SelectedIndex = 0);
+            }
+        }
+
+        private void TitleGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            if(Windows.System.Profile.AnalyticsInfo.VersionInfo.DeviceFamily == "Windows.Desktop")
+            {
+                CoreApplication.GetCurrentView().TitleBar.ExtendViewIntoTitleBar = true;
+                ApplicationViewTitleBar titleBar = ApplicationView.GetForCurrentView().TitleBar;
+                titleBar.ButtonBackgroundColor = Colors.Transparent;
+                titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+            }
+            else
+            {
+                TitleGrid.Visibility = Visibility.Collapsed;
             }
         }
     }

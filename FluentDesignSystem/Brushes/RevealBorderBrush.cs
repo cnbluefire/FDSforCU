@@ -39,34 +39,19 @@ namespace FluentDesignSystem.Brushes
                 ExtendY = CanvasEdgeBehavior.Clamp
             });
 
-            //var blendEffect = new BlendEffect()
-            //{
-            //    Name = "blend",
-            //    Mode = BlendEffectMode.Color,
-            //    Background = new BorderEffect()
-            //    {
-            //        Source = new CompositionEffectSourceParameter("color"),
-            //        ExtendX = CanvasEdgeBehavior.Clamp,
-            //        ExtendY = CanvasEdgeBehavior.Clamp
-            //    },
-            //    Foreground = new BorderEffect()
-            //    {
-            //        Source = new CompositionEffectSourceParameter("backdrop"),
-            //        ExtendX = CanvasEdgeBehavior.Clamp,
-            //        ExtendY = CanvasEdgeBehavior.Clamp
-            //    }
-            //};
-
             var Brush = compositor.CreateEffectFactory(compositeEffect).CreateBrush();
             Brush.SetSourceParameter("backdrop", compositor.CreateBackdropBrush());
             Brush.SetSourceParameter("color", compositor.CreateColorBrush(Color));
             CompositionBrush = Brush;
 
+            XamlLight.AddTargetBrush(Lights.RevealAmbientLight.GetIdStatic(), this);
             XamlLight.AddTargetBrush(Lights.RevealBorderSpotLight.GetIdStatic(), this);
         }
         protected override void OnDisconnected()
         {
             base.OnDisconnected();
+            XamlLight.RemoveTargetBrush(Lights.RevealAmbientLight.GetIdStatic(), this);
+            XamlLight.RemoveTargetBrush(Lights.RevealBorderSpotLight.GetIdStatic(), this);
         }
     }
 }

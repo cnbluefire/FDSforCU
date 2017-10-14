@@ -117,7 +117,7 @@
     </AppxManifest>
     <None Include="FDSforCU_TemporaryKey.pfx" />
     <Content Include="Assets\AboutBackgroundImage.jpg" />
-    <Content Include="Readme.md">
+    <Content Include="README.md">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

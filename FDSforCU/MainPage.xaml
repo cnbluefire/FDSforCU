@@ -15,7 +15,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="mainGrid" Background="Transparent">
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="WindowState">
                 <VisualState x:Name="Big" >
@@ -23,13 +23,19 @@
                         <AdaptiveTrigger MinWindowWidth="600" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="rootSplitView.PaneBackground" Value="{ThemeResource SystemControlAcrylicWindowMediumBrush}" />
+                        <Setter Target="mainGrid.Background" Value="{ThemeResource SystemControlAcrylicWindowMediumBrush}" />
+                        <Setter Target="rootSplitView.PaneBackground" Value="Transparent" />
                         <Setter Target="rootSplitView.DisplayMode" Value="Inline" />
                         <Setter Target="rootSplitView.IsPaneOpen" Value="True" />
+                        <Setter Target="rootSplitView.OpenPaneLength" Value="320" />
                         <Setter Target="HamburgerIconButton.Visibility" Value="Collapsed" />
                         <Setter Target="HeaderGrid.Visibility" Value="Collapsed" />
                         <Setter Target="HamburgerHeadRow.Height" Value="0" />
-                        <Setter Target="TitleGrid.Background" Value="{ThemeResource SystemControlAcrylicWindowMediumBrush}" />
+                        <Setter Target="TitleGrid.Background" Value="Transparent" />
+                        <Setter Target="TitleGrid.Height" Value="32" />
+                        <Setter Target="HeaderRow.Height" Value="44" />
+                        <Setter Target="HamburgerIconButton.Margin" Value="0" />
+                        <Setter Target="HeaderTitleText.Visibility" Value="Collapsed" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
@@ -38,11 +44,11 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <SplitView x:Name="rootSplitView" Grid.Row="1" DisplayMode="Overlay" OpenPaneLength="320" PaneBackground="{ThemeResource SystemControlAcrylicElementMediumBrush}" >
+        <SplitView x:Name="rootSplitView" Grid.Row="1" DisplayMode="Overlay" OpenPaneLength="280" PaneBackground="{ThemeResource SystemControlAcrylicElementMediumBrush}" >
             <SplitView.Pane>
                 <Grid x:Name="PaneRoot">
                     <Grid.RowDefinitions>
-                        <RowDefinition x:Name="HamburgerHeadRow" Height="44" />
+                        <RowDefinition x:Name="HamburgerHeadRow" Height="76" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
@@ -50,22 +56,23 @@
                     <ListView x:Name="ButtomMenu" Grid.Row="2" ItemsSource="{x:Bind ButtomMenuList}" ItemTemplate="{StaticResource HamburgerMenuItemTemplate}" SelectionChanged="HamburgerMenu_SelectionChanged" />
                 </Grid>
             </SplitView.Pane>
-            <Grid>
+            <Grid Background="{ThemeResource SystemChromeAltHighColor}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="44" />
+                    <RowDefinition x:Name="HeaderRow" Height="76" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Frame x:Name="ContentFrame" Grid.RowSpan="2" />
                 <Grid x:Name="HeaderGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{ThemeResource SystemControlAcrylicElementBrush}">
-                    <TextBlock x:Name="HeaderTextBlock" Margin="54,5,10,5" Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind selectedModel.Title,Mode=OneWay}" />
+                    <TextBlock x:Name="HeaderTitleText" Style="{StaticResource CaptionTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Text="FDSforCU Simple" />
+                    <TextBlock x:Name="HeaderTextBlock" Margin="54,37,10,5" Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind selectedModel.Title,Mode=OneWay}" />
                 </Grid>
             </Grid>
         </SplitView>
-        <Button x:Name="HamburgerIconButton" Background="Transparent" Grid.Row="1" Width="44" Height="44" HorizontalAlignment="Left" VerticalAlignment="Top" BorderThickness="1" Style="{ThemeResource ButtonRevealStyle}" Click="HamburgerIconButton_Click" >
+        <Button x:Name="HamburgerIconButton" Background="Transparent" Grid.Row="1" Width="44" Height="44" Margin="0,32" HorizontalAlignment="Left" VerticalAlignment="Top" BorderThickness="1" Style="{ThemeResource ButtonRevealStyle}" Click="HamburgerIconButton_Click" >
             <FontIcon FontFamily="Segoe MDL2 Assets" FontSize="24" Glyph="&#xE700;" />
         </Button>
-        <Grid x:Name="TitleGrid" Height="32" Background="{ThemeResource SystemControlAccentAcrylicWindowAccentMediumHighBrush}">
-            <TextBlock x:Name="TitleText" Style="{StaticResource CaptionTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" Text="FDSforCU Simple" />
+        <Grid x:Name="TitleGrid" Height="0" Background="{ThemeResource SystemControlAccentAcrylicWindowAccentMediumHighBrush}" Loaded="TitleGrid_Loaded">
+            <TextBlock x:Name="TitleText" Style="{StaticResource CaptionTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Text="FDSforCU Simple" />
         </Grid>
     </Grid>
 </Page>
