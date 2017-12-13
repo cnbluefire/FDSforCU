@@ -20,22 +20,60 @@ namespace FluentDesignSystem.Brushes
 {
     public class RevealBrush : XamlCompositionBrushBase
     {
-        Compositor compositor;
+        protected Compositor compositor;
 
         protected override void OnConnected()
         {
             if (DesignMode.DesignModeEnabled) return;
             compositor = ElementCompositionPreview.GetElementVisual(Window.Current.Content as UIElement).Compositor;
-            var borderEffect = new BorderEffect()
-            {
-                Source = new CompositionEffectSourceParameter("color"),
-                ExtendX = CanvasEdgeBehavior.Clamp,
-                ExtendY = CanvasEdgeBehavior.Clamp
-            };
 
-            var Brush = compositor.CreateEffectFactory(borderEffect).CreateBrush();
+            var arithmeticCompositeEffect = new ArithmeticCompositeEffect()
+            {
+                Source1 = new CompositionEffectSourceParameter("backdrop"),
+                Source2 = new BorderEffect()
+                {
+                    Source = new CompositionEffectSourceParameter("color"),
+                    ExtendX = CanvasEdgeBehavior.Clamp,
+                    ExtendY = CanvasEdgeBehavior.Clamp
+                },
+                Source1Amount = 0.5f,
+                Source2Amount = 0.5f
+            };
+            var Brush = compositor.CreateEffectFactory(arithmeticCompositeEffect).CreateBrush();
+            Brush.SetSourceParameter("backdrop", compositor.CreateBackdropBrush());
             Brush.SetSourceParameter("color", compositor.CreateColorBrush(Color));
+
+            //Brush.SetSourceParameter("backdrop", compositor.CreateBackdropBrush());
+            //Brush.SetSourceParameter("color", compositor.CreateColorBrush(Color));
+
+            //var borderEffect = new BorderEffect() {
+            //    Source = new CompositionEffectSourceParameter("source"),
+            //    ExtendX = CanvasEdgeBehavior.Clamp,
+            //    ExtendY = CanvasEdgeBehavior.Clamp,
+            //};
+            //var Brush = compositor.CreateEffectFactory(borderEffect).CreateBrush();
+            //Brush.SetSourceParameter("source", compositor.CreateColorBrush(Color));
+
+            //var compositeEffect = new CompositeEffect() { Mode = CanvasComposite.Copy};
+            //compositeEffect.Sources.Add(new BorderEffect()
+            //{
+            //    Source = new CompositionEffectSourceParameter("backdrop"),
+            //    ExtendX = CanvasEdgeBehavior.Clamp,
+            //    ExtendY = CanvasEdgeBehavior.Clamp
+            //});
+            //compositeEffect.Sources.Add(new BorderEffect()
+            //{
+            //    Source = new CompositionEffectSourceParameter("color"),
+            //    ExtendX = CanvasEdgeBehavior.Clamp,
+            //    ExtendY = CanvasEdgeBehavior.Clamp
+            //});
+            //var Brush = compositor.CreateEffectFactory(compositeEffect).CreateBrush();
+            
+            //Brush.SetSourceParameter("backdrop", compositor.CreateBackdropBrush());
+            //Brush.SetSourceParameter("color", compositor.CreateColorBrush(Color));
+
             CompositionBrush = Brush;
+
         }
 
         protected override void OnDisconnected()

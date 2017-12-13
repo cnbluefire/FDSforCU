@@ -108,15 +108,20 @@
   <ItemGroup>
     <Compile Include="Brushes\AcrylicBackgroundSource.cs" />
     <Compile Include="Brushes\AcrylicBrush.cs" />
+    <Compile Include="Brushes\GlassBrush.cs" />
     <Compile Include="Brushes\RevealBackgroundBrush.cs" />
     <Compile Include="Brushes\RevealBorderBrush.cs" />
     <Compile Include="Brushes\RevealBrush.cs" />
     <Compile Include="Brushes\RevealBrushState.cs" />
     <Compile Include="Helper\RevealBrushHelper.cs" />
     <Compile Include="Helper\RevealBrushHelperState.cs" />
+    <Compile Include="Helper\VisualTree.cs" />
+    <Compile Include="Lights\LightCollection.cs" />
     <Compile Include="Lights\RevealAmbientLight.cs" />
     <Compile Include="Lights\RevealBorderSpotLight.cs" />
-    <Compile Include="Lights\RevealContentSpotLight.cs" />
+    <Compile Include="Lights\RevealContentHoverLight.cs" />
+    <Compile Include="Lights\RevealContentPressedLight.cs" />
+    <Compile Include="Lights\RevealLightBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StaticValue.cs" />
     <EmbeddedResource Include="Properties\FluentDesignSystem.rd.xml" />

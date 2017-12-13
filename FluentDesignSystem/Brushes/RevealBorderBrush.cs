@@ -11,6 +11,7 @@ using Windows.Foundation;
 using Windows.Graphics.DirectX;
 using Windows.UI;
 using Windows.UI.Composition;
+using Windows.UI.Composition.Effects;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Hosting;
 using Windows.UI.Xaml.Media;
@@ -19,29 +20,27 @@ namespace FluentDesignSystem.Brushes
 {
     public class RevealBorderBrush : RevealBrush
     {
-        Compositor compositor;
-
         protected override void OnConnected()
         {
             if (DesignMode.DesignModeEnabled) return;
             compositor = ElementCompositionPreview.GetElementVisual(Window.Current.Content as UIElement).Compositor;
-            var compositeEffect = new CompositeEffect() { Mode = CanvasComposite.Add };
-            compositeEffect.Sources.Add(new BorderEffect()
-            {
-                Source = new CompositionEffectSourceParameter("backdrop"),
-                ExtendX = CanvasEdgeBehavior.Clamp,
-                ExtendY = CanvasEdgeBehavior.Clamp
-            });
-            compositeEffect.Sources.Add(new BorderEffect()
-            {
-                Source = new CompositionEffectSourceParameter("color"),
-                ExtendX = CanvasEdgeBehavior.Clamp,
-                ExtendY = CanvasEdgeBehavior.Clamp
-            });
 
-            var Brush = compositor.CreateEffectFactory(compositeEffect).CreateBrush();
+            var arithmeticCompositeEffect = new ArithmeticCompositeEffect()
+            {
+                Source1 = new CompositionEffectSourceParameter("backdrop"),
+                Source2 = new BorderEffect()
+                {
+                    Source = new CompositionEffectSourceParameter("color"),
+                    ExtendX = CanvasEdgeBehavior.Clamp,
+                    ExtendY = CanvasEdgeBehavior.Clamp
+                },
+                Source1Amount = 0.9f,
+                Source2Amount = 0.1f
+            };
+            var Brush = compositor.CreateEffectFactory(arithmeticCompositeEffect).CreateBrush();
             Brush.SetSourceParameter("backdrop", compositor.CreateBackdropBrush());
             Brush.SetSourceParameter("color", compositor.CreateColorBrush(Color));
+
             CompositionBrush = Brush;
 
             XamlLight.AddTargetBrush(Lights.RevealAmbientLight.GetIdStatic(), this);

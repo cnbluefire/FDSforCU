@@ -29,13 +29,67 @@ namespace FluentDesignSystem.Brushes
         {
             if (DesignMode.DesignModeEnabled) return;
             compositor = ElementCompositionPreview.GetElementVisual(Window.Current.Content as UIElement).Compositor;
+
+            var line = compositor.CreateLinearEasingFunction();
+
+            TintOpacityFillAnimation = compositor.CreateScalarKeyFrameAnimation();
+            TintOpacityFillAnimation.InsertExpressionKeyFrame(0f, "TintOpacity", line);
+            TintOpacityFillAnimation.InsertKeyFrame(1f, 1f, line);
+            TintOpacityFillAnimation.Duration = TimeSpan.FromSeconds(0.1d);
+            TintOpacityFillAnimation.Target = "arithmetic.Source2Amount";
+
+            HostOpacityZeroAnimation = compositor.CreateScalarKeyFrameAnimation();
+            HostOpacityZeroAnimation.InsertExpressionKeyFrame(0f, "1f - TintOpacity", line);
+            HostOpacityZeroAnimation.InsertKeyFrame(1f, 0f, line);
+            HostOpacityZeroAnimation.Duration = TimeSpan.FromSeconds(0.1d);
+            HostOpacityZeroAnimation.Target = "arithmetic.Source1Amount";
+
+            TintToFallBackAnimation = compositor.CreateColorKeyFrameAnimation();
+            TintToFallBackAnimation.InsertKeyFrame(0f, TintColor, line);
+            TintToFallBackAnimation.InsertKeyFrame(1f, FallbackColor, line);
+            TintToFallBackAnimation.Duration = TimeSpan.FromSeconds(0.1d);
+            TintToFallBackAnimation.Target = "tintcolor.Color";
+
+            var useFallBack = !CompositionCapabilities.GetForCurrentView().AreEffectsFast();
+            if (useFallBack)
+            {
+                CompositionBrush = compositor.CreateColorBrush(TintColor);
+            }
+            else
+            {
+                CreateBrush();
+            }
+
+            //Window.Current.Activated += Current_Activated;
+            //Window.Current.VisibilityChanged += Current_VisibilityChanged;
+            CoreWindow.GetForCurrentThread().Activated += AcrylicBrush_Activated;
+            CoreWindow.GetForCurrentThread().VisibilityChanged += AcrylicBrush_VisibilityChanged;
+            CompositionCapabilities.GetForCurrentView().Changed += AcrylicBrush_Changed;
+        }
+
+        private void AcrylicBrush_Changed(CompositionCapabilities sender, object args)
+        {
+            CompositionBrush.Dispose();
+            CompositionBrush = null;
+            if (sender.AreEffectsFast())
+            {
+                CreateBrush();
+            }
+            else
+            {
+                CompositionBrush = compositor.CreateColorBrush(TintColor);
+            }
+        }
+
+        private void CreateBrush()
+        {
             var tintOpacity = Convert.ToSingle(TintOpacity);
             if (tintOpacity < 0f) tintOpacity = 0f;
             if (tintOpacity > 1f) tintOpacity = 1f;
             var arithmeticEffect = new ArithmeticCompositeEffect()
             {
                 Name = "arithmetic",
-                MultiplyAmount = 0,
+                MultiplyAmount = 0f,
                 Source1Amount = 1f - tintOpacity,
                 Source2Amount = tintOpacity,
                 Source1 = new ArithmeticCompositeEffect()
@@ -83,37 +137,28 @@ namespace FluentDesignSystem.Brushes
                     break;
             }
 
+            SetAnimation(Brush);
+
             CompositionBrush = Brush;
-
-            var line = compositor.CreateLinearEasingFunction();
-
-            TintOpacityFillAnimation = compositor.CreateScalarKeyFrameAnimation();
-            TintOpacityFillAnimation.InsertExpressionKeyFrame(0f, "TintOpacity", line);
-            TintOpacityFillAnimation.InsertKeyFrame(1f, 1f, line);
-            TintOpacityFillAnimation.Duration = TimeSpan.FromSeconds(0.1d);
-            TintOpacityFillAnimation.Target = "arithmetic.Source2Amount";
-
-            HostOpacityZeroAnimation = compositor.CreateScalarKeyFrameAnimation();
-            HostOpacityZeroAnimation.InsertExpressionKeyFrame(0f, "1f - TintOpacity", line);
-            HostOpacityZeroAnimation.InsertKeyFrame(1f, 0f, line);
-            HostOpacityZeroAnimation.Duration = TimeSpan.FromSeconds(0.1d);
-            HostOpacityZeroAnimation.Target = "arithmetic.Source1Amount";
-
-            TintToFallBackAnimation = compositor.CreateColorKeyFrameAnimation();
-            TintToFallBackAnimation.InsertKeyFrame(0f, TintColor, line);
-            TintToFallBackAnimation.InsertKeyFrame(1f, FallbackColor, line);
-            TintToFallBackAnimation.Duration = TimeSpan.FromSeconds(0.1d);
-            TintToFallBackAnimation.Target = "tintcolor.Color";
-
-            //Window.Current.Activated += Current_Activated;
-            //Window.Current.VisibilityChanged += Current_VisibilityChanged;
-            CoreWindow.GetForCurrentThread().Activated += AcrylicBrush_Activated;
-            CoreWindow.GetForCurrentThread().VisibilityChanged += AcrylicBrush_VisibilityChanged;
         }
 
+        private void SetAnimation(CompositionBrush brush)
+        {
+            var animations = compositor.CreateImplicitAnimationCollection();
+
+            var blurAmountAnimation = compositor.CreateScalarKeyFrameAnimation();
+            blurAmountAnimation.InsertExpressionKeyFrame(0f, "this.StartingValue");
+            blurAmountAnimation.InsertExpressionKeyFrame(1f, "this.FinalValue");
+            blurAmountAnimation.Duration = TimeSpan.FromSeconds(0.9d);
+            blurAmountAnimation.Target = "blur.BlurAmount";
+
+            animations["blur.BlurAmount"] = blurAmountAnimation;
+            brush.Properties.ImplicitAnimations = animations;
+        }
 
         protected override void OnDisconnected()
         {
+            CompositionCapabilities.GetForCurrentView().Changed -= AcrylicBrush_Changed;
             CoreWindow.GetForCurrentThread().Activated -= AcrylicBrush_Activated;
             CoreWindow.GetForCurrentThread().VisibilityChanged -= AcrylicBrush_VisibilityChanged;
             CompositionBrush.Dispose();
@@ -154,17 +199,17 @@ namespace FluentDesignSystem.Brushes
             else CompositionBrush = compositor.CreateColorBrush(FallbackColor);
         }
 
-        //private void Current_VisibilityChanged(object sender, VisibilityChangedEventArgs e)
-        //{
-        //    if (BackgroundSource == AcrylicBackgroundSource.Hostbackdrop)
-        //        SetCompositionFocus(e.Visible);
-        //}
+        private void Current_VisibilityChanged(object sender, VisibilityChangedEventArgs e)
+        {
+            if (BackgroundSource == AcrylicBackgroundSource.Hostbackdrop)
+                SetCompositionFocus(e.Visible);
+        }
 
-        //private void Current_Activated(object sender, WindowActivatedEventArgs e)
-        //{
-        //    if (BackgroundSource == AcrylicBackgroundSource.Hostbackdrop)
-        //        SetCompositionFocus(e.WindowActivationState != CoreWindowActivationState.Deactivated);
-        //}
+        private void Current_Activated(object sender, WindowActivatedEventArgs e)
+        {
+            if (BackgroundSource == AcrylicBackgroundSource.Hostbackdrop)
+                SetCompositionFocus(e.WindowActivationState != CoreWindowActivationState.Deactivated);
+        }
 
         private void AcrylicBrush_VisibilityChanged(CoreWindow sender, VisibilityChangedEventArgs args)
         {
@@ -221,15 +266,18 @@ namespace FluentDesignSystem.Brushes
                     if (DesignMode.DesignModeEnabled) return;
                     else
                     {
-                        if (sender.CompositionBrush == null) return;
-                        switch (e.NewValue)
+                        if (sender.CompositionBrush is CompositionColorBrush) return;
+                        else if(sender.CompositionBrush is CompositionEffectBrush)
                         {
-                            case AcrylicBackgroundSource.Backdrop:
-                                (sender.CompositionBrush as CompositionEffectBrush).SetSourceParameter("source", sender.compositor.CreateBackdropBrush());
-                                break;
-                            case AcrylicBackgroundSource.Hostbackdrop:
-                                (sender.CompositionBrush as CompositionEffectBrush).SetSourceParameter("source", sender.compositor.CreateHostBackdropBrush());
-                                break;
+                            switch (e.NewValue)
+                            {
+                                case AcrylicBackgroundSource.Backdrop:
+                                    (sender.CompositionBrush as CompositionEffectBrush).SetSourceParameter("source", sender.compositor.CreateBackdropBrush());
+                                    break;
+                                case AcrylicBackgroundSource.Hostbackdrop:
+                                    (sender.CompositionBrush as CompositionEffectBrush).SetSourceParameter("source", sender.compositor.CreateHostBackdropBrush());
+                                    break;
+                            }
                         }
                     }
                 }
@@ -244,8 +292,11 @@ namespace FluentDesignSystem.Brushes
                 if (DesignMode.DesignModeEnabled) return;
                 else
                 {
-                    if (sender.CompositionBrush == null) return;
-                    sender.CompositionBrush.Properties.InsertScalar("blur.BlurAmount", Convert.ToSingle(e.NewValue));
+                    if (sender.CompositionBrush is CompositionColorBrush) return;
+                    else if(sender.CompositionBrush is CompositionEffectBrush)
+                    {
+                        sender.CompositionBrush.Properties.InsertScalar("blur.BlurAmount", Convert.ToSingle(e.NewValue));
+                    }
                 }
             }
         }
@@ -257,8 +308,11 @@ namespace FluentDesignSystem.Brushes
                 if (DesignMode.DesignModeEnabled) return;
                 else
                 {
-                    if (sender.CompositionBrush == null) return;
-                    sender.CompositionBrush.Properties.InsertColor("tintcolor.Color", (Color)e.NewValue);
+                    if (sender.CompositionBrush is CompositionColorBrush) return;
+                    else if (sender.CompositionBrush is CompositionEffectBrush)
+                    {
+                        sender.CompositionBrush.Properties.InsertColor("tintcolor.Color", (Color)e.NewValue);
+                    }
                 }
             }
         }
@@ -270,12 +324,15 @@ namespace FluentDesignSystem.Brushes
                 if (DesignMode.DesignModeEnabled) return;
                 else
                 {
-                    if (sender.CompositionBrush == null) return;
-                    var tintOpacity = Convert.ToSingle(e.NewValue);
-                    if (tintOpacity < 0f) tintOpacity = 0f;
-                    if (tintOpacity > 1f) tintOpacity = 1f;
-                    sender.CompositionBrush.Properties.InsertScalar("arithmetic.Source1Amount", 1f - tintOpacity);
-                    sender.CompositionBrush.Properties.InsertScalar("arithmetic.Source2Amount", tintOpacity);
+                    if (sender.CompositionBrush is CompositionColorBrush) return;
+                    else if (sender.CompositionBrush is CompositionEffectBrush)
+                    {
+                        var tintOpacity = Convert.ToSingle(e.NewValue);
+                        if (tintOpacity < 0f) tintOpacity = 0f;
+                        if (tintOpacity > 1f) tintOpacity = 1f;
+                        sender.CompositionBrush.Properties.InsertScalar("arithmetic.Source1Amount", 1f - tintOpacity);
+                        sender.CompositionBrush.Properties.InsertScalar("arithmetic.Source2Amount", tintOpacity);
+                    }
                 }
             }
         }

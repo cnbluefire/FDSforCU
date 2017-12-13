@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
+using Windows.Devices.Input;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -38,185 +39,168 @@ namespace FluentDesignSystem.Helper
             {
                 var element = (d as UIElement);
                 if (element == null) return;
-                InitLights();
-                switch ((RevealBrushHelperState)e.NewValue)
+                var baseElement = element.FindBaseElement();
+                if (baseElement == null) return;
+                element.AddBaseElement(baseElement);
+                AddBaseHandle(baseElement);
+                Lights.LightCollection.UpdateLightCollection(baseElement, true);
+                var mode = (RevealBrushHelperState)e.NewValue;
+                SetTargetLight(element, mode);
+
+                if (!CoreWindowHandled)
                 {
-                    case RevealBrushHelperState.Normal:
-                        {
-                            if (element is Grid grid && InPopupGridNameList.Contains(grid.Name))
-                            {
-                                element.AddHandler(UIElement.PointerExitedEvent, new PointerEventHandler(element_PointerExited), true);
-                                element.AddHandler(UIElement.PointerMovedEvent, new PointerEventHandler(element_PointerMoved), true);
-                                SetPopupLight();
-                            }
-                            else
-                            {
-                                RevealBrushHelper.SetTargetLight(element, SetLightMode.Border);
-                            }
-                            SetElementContentLightPressed(element, false);
-                        }
-                        return;
-                    case RevealBrushHelperState.PointerOver:
-                        {
-                            if (element is Grid grid && InPopupGridNameList.Contains(grid.Name))
-                            {
-                                SetPopupLight();
-                            }
-                            RevealBrushHelper.SetTargetLight(element, SetLightMode.All);
-                            SetElementContentLightPressed(element, false);
-                        }
-                        break;
-                    case RevealBrushHelperState.Pressed:
-                        {
-                            if (element is Grid grid && InPopupGridNameList.Contains(grid.Name))
-                            {
-                                SetPopupLight();
-                            }
-                            RevealBrushHelper.SetTargetLight(element, SetLightMode.All);
-                            SetElementContentLightPressed(element, true);
-                        }
-                        break;
+                    CoreWindow.GetForCurrentThread().Activated += CoreWindow_Activated;
+                    Window.Current.VisibilityChanged += Current_VisibilityChanged;
                 }
             }
         }
 
-        private static void PointerExited(CoreWindow sender, PointerEventArgs e)
+        private static void Current_VisibilityChanged(object sender, VisibilityChangedEventArgs e)
         {
-            RemoveLights();
-        }
-
-        private static void PointerEntered(CoreWindow sender, PointerEventArgs e)
-        {
-            InitLights();
-        }
-
-        private static void PointerMoved(CoreWindow sender, PointerEventArgs args)
-        {
-            var position = args.CurrentPoint.Position.ToVector2();
-            if (BorderLight != null)
-                BorderLight.SetPosition(position);
-            if (ContentLight != null)
-                ContentLight.SetPosition(position);
-        }
-
-        private static void InitLights()
-        {
-            if (AmbientLight == null) AmbientLight = new Lights.RevealAmbientLight();
-            if (BorderLight == null) BorderLight = new Lights.RevealBorderSpotLight();
-            if (ContentLight == null) ContentLight = new Lights.RevealContentSpotLight();
-
-            if (Window.Current.Content.Lights.Count == 0)
+            if (!e.Visible)
             {
-                Window.Current.Content.Lights.Add(AmbientLight);
-                Window.Current.Content.Lights.Add(BorderLight);
-                Window.Current.Content.Lights.Add(ContentLight);
-            }
-
-            if (!IsWindowPointerEnteredHandled)
-            {
-                CoreWindow.GetForCurrentThread().PointerEntered += PointerEntered;
-                IsWindowPointerEnteredHandled = true;
-            }
-            if (!IsWindowPointerExitedHandled)
-            {
-                CoreWindow.GetForCurrentThread().PointerExited += PointerExited;
-                IsWindowPointerExitedHandled = true;
-
-            }
-            if (!IsWindowPointerMovedHandled)
-            {
-                CoreWindow.GetForCurrentThread().PointerMoved += PointerMoved;
-                IsWindowPointerMovedHandled = true;
+                Lights.LightCollection.DisableLightCollection();
             }
         }
 
-        private static void RemoveLights()
+        private static void CoreWindow_Activated(CoreWindow sender, WindowActivatedEventArgs args)
         {
-            Window.Current.Content.Lights.Clear();
-        }
-
-        private static void SetElementContentLightPressed(UIElement element, bool IsPressed)
-        {
-            ContentLight.IsPressedEnable = IsPressed;
-            foreach (var popup in VisualTreeHelper.GetOpenPopups(Window.Current))
+            if(args.WindowActivationState == CoreWindowActivationState.Deactivated)
             {
-                var contentLight = GetContentLight(popup);
-                if (contentLight != null) contentLight.IsPressedEnable = IsPressed;
+                Lights.LightCollection.DisableLightCollection();
             }
         }
 
-        private static void SetPopupLight()
+        private static void PointerExited(object sender, PointerRoutedEventArgs e)
         {
-            foreach (var popup in VisualTreeHelper.GetOpenPopups(Window.Current))
+            if (sender is UIElement element)
             {
-                if (popup.Lights.Count == 0)
+                Lights.LightCollection.DisableLightCollection(element);
+            }
+        }
+
+        private static void PointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is UIElement element)
+            {
+                Lights.LightCollection.DisableLightCollection(element);
+            }
+        }
+
+        private static void PointerMoved(object sender, PointerRoutedEventArgs e)
+        {
+            if (sender is UIElement element)
+            {
+                Lights.LightCollection.SetPosition(element, e.GetCurrentPoint(element));
+            }
+        }
+
+        private static void Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is UIElement element)
+            {
+                RemoveBaseHandle(element);
+                Lights.LightCollection.RemoveLightCollection(element);
+            }
+        }
+
+        private static void AddBaseHandle(UIElement element)
+        {
+            var lightCollection = Lights.LightCollection.GetLightCollection(element);
+            if (lightCollection != null)
+            {
+                if (!lightCollection.PointerEnteredHandled)
                 {
-                    popup.Lights.Add(ChildAmbientLight);
-                    popup.Lights.Add(ChildContentLight);
+                    element.AddHandler(UIElement.PointerEnteredEvent, new PointerEventHandler(PointerEntered), true);
+                    lightCollection.PointerEnteredHandled = true;
+                }
+                if (!lightCollection.PointerExitedHandled)
+                {
+                    element.AddHandler(UIElement.PointerExitedEvent, new PointerEventHandler(PointerExited), true);
+                    lightCollection.PointerExitedHandled = true;
+                }
+                if (!lightCollection.PointerMovedHandled)
+                {
+                    element.AddHandler(UIElement.PointerMovedEvent, new PointerEventHandler(PointerMoved), true);
+                    lightCollection.PointerMovedHandled = true;
+                }
+                if (!lightCollection.UnloadedHandled)
+                {
+                    ((FrameworkElement)element).Unloaded += Unloaded;
+                    lightCollection.UnloadedHandled = true;
                 }
             }
         }
 
-        private static void RemovePopupLight()
+        private static void RemoveBaseHandle(UIElement element)
         {
-            foreach (var popup in VisualTreeHelper.GetOpenPopups(Window.Current))
+            var lightCollection = Lights.LightCollection.GetLightCollection(element);
+            if (lightCollection != null)
             {
-                popup.Lights.Clear();
+                if (lightCollection.PointerEnteredHandled)
+                {
+                    element.RemoveHandler(UIElement.PointerEnteredEvent, new PointerEventHandler(PointerEntered));
+                    lightCollection.PointerEnteredHandled = false;
+                }
+                if (lightCollection.PointerExitedHandled)
+                {
+                    element.RemoveHandler(UIElement.PointerExitedEvent, new PointerEventHandler(PointerExited));
+                    lightCollection.PointerExitedHandled = false;
+                }
+                if (lightCollection.PointerMovedHandled)
+                {
+                    element.RemoveHandler(UIElement.PointerMovedEvent, new PointerEventHandler(PointerMoved));
+                    lightCollection.PointerMovedHandled = false;
+                }
+                if (lightCollection.UnloadedHandled)
+                {
+                    ((FrameworkElement)element).Unloaded -= Unloaded;
+                    lightCollection.UnloadedHandled = false;
+                }
             }
         }
 
-        private static Lights.RevealContentSpotLight GetContentLight(UIElement element)
+        public static void SetTargetLight(UIElement Target, RevealBrushHelperState Mode)
         {
-            foreach (var light in element.Lights)
+            var baseElement = Target.GetBaseElement();
+            switch (Mode)
             {
-                if (light is Lights.RevealContentSpotLight ContentLight && ContentLight.IsConnected)
-                    return ContentLight;
-            }
-            return null;
-        }
-
-        public static void SetTargetLight(UIElement Target, SetLightMode Mode)
-        {
-            switch (Target)
-            {
-                case Grid element:
-                    switch (Mode)
-                    {
-                        case SetLightMode.None:
-                            XamlLight.RemoveTargetElement(Lights.RevealAmbientLight.GetIdStatic(), element);
-                            XamlLight.RemoveTargetElement(Lights.RevealContentSpotLight.GetIdStatic(), element);
-                            break;
-                        case SetLightMode.Border:
-                            XamlLight.AddTargetElement(Lights.RevealAmbientLight.GetIdStatic(), element);
-                            XamlLight.RemoveTargetElement(Lights.RevealContentSpotLight.GetIdStatic(), element);
-                            break;
-                        case SetLightMode.All:
-                            XamlLight.AddTargetElement(Lights.RevealAmbientLight.GetIdStatic(), element);
-                            XamlLight.AddTargetElement(Lights.RevealContentSpotLight.GetIdStatic(), element);
-                            break;
-                    }
+                case RevealBrushHelperState.Normal:
+                    XamlLight.AddTargetElement(Lights.RevealAmbientLight.GetIdStatic(), Target);
+                    XamlLight.RemoveTargetElement(Lights.RevealContentHoverLight.GetIdStatic(), Target);
+                    XamlLight.RemoveTargetElement(Lights.RevealContentPressedLight.GetIdStatic(), Target);
+                    Lights.LightCollection.UpdateLightCollection(baseElement, null, false, false);
+                    break;
+                case RevealBrushHelperState.PointerOver:
+                    XamlLight.AddTargetElement(Lights.RevealAmbientLight.GetIdStatic(), Target);
+                    XamlLight.AddTargetElement(Lights.RevealContentHoverLight.GetIdStatic(), Target);
+                    XamlLight.AddTargetElement(Lights.RevealContentPressedLight.GetIdStatic(), Target);
+                    Lights.LightCollection.UpdateLightCollection(baseElement, null, false, true);
+                    break;
+                case RevealBrushHelperState.Pressed:
+                    XamlLight.AddTargetElement(Lights.RevealAmbientLight.GetIdStatic(), Target);
+                    XamlLight.AddTargetElement(Lights.RevealContentHoverLight.GetIdStatic(), Target);
+                    XamlLight.AddTargetElement(Lights.RevealContentPressedLight.GetIdStatic(), Target);
+                    Lights.LightCollection.UpdateLightCollection(baseElement, null, true);
                     break;
             }
-
         }
 
-        private static void element_PointerExited(object sender, PointerRoutedEventArgs e)
+        public static UIElement FindBaseElement(this UIElement element)
         {
-            var element = sender as UIElement;
-            RevealBrushHelper.SetTargetLight(element, SetLightMode.Border);
-            RemovePopupLight();
-            element.RemoveHandler(UIElement.PointerMovedEvent, new PointerEventHandler(element_PointerMoved));
-            element.RemoveHandler(UIElement.PointerExitedEvent, new PointerEventHandler(element_PointerExited));
-        }
-
-        private static void element_PointerMoved(object sender, PointerRoutedEventArgs e)
-        {
-            foreach (var popup in VisualTreeHelper.GetOpenPopups(Window.Current))
+            var popups = VisualTreeHelper.GetOpenPopups(Window.Current);
+            foreach (var popup in popups)
             {
-                var position = (sender as UIElement).TransformToVisual(popup).TransformPoint(e.GetCurrentPoint(sender as UIElement).Position).ToVector2();
-                var contentLight = GetContentLight(popup);
-                if (contentLight != null) contentLight.SetPosition(position);
+                if (popup.IsOpen)
+                {
+                    if (StaticValue.PopupNameList.Contains(popup.Name))
+                    {
+                        if (popup.Child != null)
+                            return popup.Child;
+                    }
+                }
             }
+            return Window.Current.Content;
         }
 
         public enum SetLightMode

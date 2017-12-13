@@ -19,5 +19,28 @@ namespace FluentDesignSystem.Brushes
 {
     public class RevealBackgroundBrush : RevealBrush
     {
+        protected override void OnConnected()
+        {
+            if (DesignMode.DesignModeEnabled) return;
+            compositor = ElementCompositionPreview.GetElementVisual(Window.Current.Content as UIElement).Compositor;
+
+            var arithmeticCompositeEffect = new ArithmeticCompositeEffect()
+            {
+                Source1 = new CompositionEffectSourceParameter("backdrop"),
+                Source2 = new BorderEffect()
+                {
+                    Source = new CompositionEffectSourceParameter("color"),
+                    ExtendX = CanvasEdgeBehavior.Clamp,
+                    ExtendY = CanvasEdgeBehavior.Clamp
+                },
+                Source1Amount = 0.2f,
+                Source2Amount = 0.8f
+            };
+            var Brush = compositor.CreateEffectFactory(arithmeticCompositeEffect).CreateBrush();
+            Brush.SetSourceParameter("backdrop", compositor.CreateBackdropBrush());
+            Brush.SetSourceParameter("color", compositor.CreateColorBrush(Color));
+
+            CompositionBrush = Brush;
+        }
     }
 }

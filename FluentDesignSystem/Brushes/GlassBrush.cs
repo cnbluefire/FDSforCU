@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml.Media;
 
 namespace FluentDesignSystem.Brushes
 {
-    public enum AcrylicBackgroundSource
+    public class GlassBrush : XamlCompositionBrushBase
     {
-        Backdrop, Hostbackdrop
+
     }
 }
