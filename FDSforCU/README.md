@@ -1,11 +1,12 @@
 Fluent Design System for Creators Update V0.3
 ==============
-更新内容:
-1.Reveal Light效果与RedStone4同步;
-2.大幅度优化光照逻辑(虽然不知道优化到底有没有效);
-3.稳定性还是欠佳(别打我).
+更新内容:  
+1.Reveal Light效果与RedStone4同步;  
+2.大幅度优化光照逻辑(虽然不知道优化到底有没有效);  
+3.稳定性还是欠佳(别打我).  
 
-==============
+***
+
 Fluent Design System for Creators Update(FDS4CU)是一个UWP的资源库，将Windows10 Fall Creators Update(10.0;版本16299)SDK中的部分效果(Acrylic和Reveal)移植到Windows10 15063中。  
 目前支持全部的Acrylic笔刷和Button，ToggleButton，RepeatButton，SemanticZoom，AutoSuggestBox,ComboBox,ListView和GridView的Reveal效果。  
 

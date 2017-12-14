@@ -124,21 +124,5 @@ namespace FluentDesignSystem.Helper
             return parent.FindAscendant<T>();
         }
 
-        public static UIElement FindBaseElement(this UIElement element)
-        {
-            var popups = VisualTreeHelper.GetOpenPopups(Window.Current);
-            foreach (var popup in popups)
-            {
-                if (popup.IsOpen)
-                {
-                    if (StaticValue.PopupNameList.Contains(popup.Name))
-                    {
-                        if (popup.Child != null)
-                            return popup.Child;
-                    }
-                }
-            }
-            return Window.Current.Content;
-        }
     }
 }
