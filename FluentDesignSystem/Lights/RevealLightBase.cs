@@ -16,6 +16,7 @@ namespace FluentDesignSystem.Lights
 {
     public class RevealLightBase : XamlLight
     {
+        protected bool IsConnected = false;
         protected UIElement element;
         protected Compositor compositor;
         protected CompositionPropertySet pointPropSet;
@@ -26,6 +27,7 @@ namespace FluentDesignSystem.Lights
 
         protected override void OnConnected(UIElement newElement)
         {
+            base.OnConnected(newElement);
             element = newElement;
             compositor = Window.Current.Compositor;
             pointPropSet = ElementCompositionPreview.GetPointerPositionPropertySet(element);
@@ -36,10 +38,12 @@ namespace FluentDesignSystem.Lights
             OffsetAnimation = compositor.CreateExpressionAnimation("Vector3(PointPropSet.Position.X,PointPropSet.Position.Y,PropSet.height)");
             OffsetAnimation.SetReferenceParameter("PointPropSet", pointPropSet);
             OffsetAnimation.SetReferenceParameter("PropSet", propSet);
+            IsConnected = true;
         }
 
         protected override void OnDisconnected(UIElement oldElement)
         {
+            IsConnected = false;
             base.OnDisconnected(oldElement);
             CompositionLight.StopAnimation("Offset");
             element = null;
@@ -53,6 +57,7 @@ namespace FluentDesignSystem.Lights
 
         public void SetPosition(Vector2 position,bool IsPoint)
         {
+            if (!IsConnected) return;
             if (element == null) return;
             if (CompositionLight is SpotLight spotLight)
             {

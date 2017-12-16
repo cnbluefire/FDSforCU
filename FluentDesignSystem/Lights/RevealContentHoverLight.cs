@@ -45,6 +45,15 @@ namespace FluentDesignSystem.Lights
             OnConnectionAnimation.Duration = TimeSpan.FromSeconds(0.05d);
         }
 
+        protected override void OnDisconnected(UIElement oldElement)
+        {
+            base.OnDisconnected(oldElement);
+            cbEasing.Dispose();
+            cbEasing = null;
+            OnConnectionAnimation.Dispose();
+            OnConnectionAnimation = null;
+        }
+
         protected override string GetId()
         {
             return GetIdStatic();
@@ -55,30 +64,34 @@ namespace FluentDesignSystem.Lights
             return typeof(RevealContentHoverLight).FullName;
         }
 
-        public bool IsConnected
+        public bool IsPointerEntered
         {
-            get { return (bool)GetValue(IsConnectedProperty); }
-            set { SetValue(IsConnectedProperty, value); }
+            get { return (bool)GetValue(IsPointerEnteredProperty); }
+            set { SetValue(IsPointerEnteredProperty, value); }
         }
-        public static readonly DependencyProperty IsConnectedProperty =
-            DependencyProperty.Register("IsConnected", typeof(bool), typeof(RevealContentHoverLight), new PropertyMetadata(false,IsConnectedChanged));
-        private static void IsConnectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static readonly DependencyProperty IsPointerEnteredProperty =
+            DependencyProperty.Register("IsPointerEntered", typeof(bool), typeof(RevealContentHoverLight), new PropertyMetadata(false, IsPointerEnteredChanged));
+        private static void IsPointerEnteredChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if(e.NewValue != e.OldValue)
+            if (e.NewValue != e.OldValue)
             {
                 var sender = (RevealContentHoverLight)d;
-                var value = (bool)e.NewValue;
-
-                if (value)
+                if (sender.IsConnected)
                 {
-                    sender.propSet.StartAnimation("height", sender.OnConnectionAnimation);
-                }
-                else
-                {
-                    sender.propSet.StopAnimation("height");
+                    if (sender.IsPointerEntered)
+                    {
+                        var value = (bool)e.NewValue;
+                        if (value)
+                        {
+                            sender.propSet.StartAnimation("height", sender.OnConnectionAnimation);
+                        }
+                        else
+                        {
+                            sender.propSet.StopAnimation("height");
+                        }
+                    }
                 }
             }
-
         }
     }
 }

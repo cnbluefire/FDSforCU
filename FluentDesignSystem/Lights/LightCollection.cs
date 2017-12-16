@@ -45,7 +45,7 @@ namespace FluentDesignSystem.Lights
             if (point.PointerDevice.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Touch) IsPoint = false;
             UpdateLightCollection(element, IsPoint);
         }
-        public static void UpdateLightCollection(UIElement element, bool? IsPoint = null, bool? IsPressed = null, bool? IsConnected = null)
+        public static void UpdateLightCollection(UIElement element, bool? IsPoint = null, bool? IsPressed = null, bool? IsPointerEntered = null)
         {
             AddLightCollection(element);
 
@@ -70,9 +70,9 @@ namespace FluentDesignSystem.Lights
             {
                 lightCollection.PressedLight.IsPressed = IsPressed.Value;
             }
-            if (IsConnected.HasValue)
+            if (IsPointerEntered.HasValue)
             {
-                lightCollection.HoverLight.IsConnected = IsConnected.Value;
+                lightCollection.HoverLight.IsPointerEntered = IsPointerEntered.Value;
             }
         }
 

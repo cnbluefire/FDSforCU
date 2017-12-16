@@ -39,6 +39,11 @@ namespace FluentDesignSystem.Lights
             spotlight.StartAnimation("Offset", OffsetAnimation);
         }
 
+        protected override void OnDisconnected(UIElement oldElement)
+        {
+            base.OnDisconnected(oldElement);
+        }
+
         public static string GetIdStatic()
         {
             return typeof(RevealBorderSpotLight).FullName;

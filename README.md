@@ -1,5 +1,12 @@
-Fluent Design System for Creators Update V0.3
+Fluent Design System for Creators Update
 ==============
+v0.3.1  
+更新内容：  
+修复一个导致崩溃的严重Bug;  
+
+***
+
+v0.3  
 更新内容:  
 1.Reveal Light效果与RedStone4同步;  
 2.大幅度优化光照逻辑(虽然不知道优化到底有没有效);  

@@ -20,7 +20,6 @@ namespace FluentDesignSystem.Lights
     {
         CubicBezierEasingFunction cbEasing;
         LinearEasingFunction line;
-        ExpressionAnimation LinearAttenuationAnimation;
         ColorKeyFrameAnimation ColorAnimation;
         ScalarKeyFrameAnimation HeightAnimation;
 
@@ -30,13 +29,13 @@ namespace FluentDesignSystem.Lights
             base.OnConnected(newElement);
 
             var spotlight = compositor.CreateSpotLight();
-            spotlight.InnerConeAngleInDegrees = 2f;
+            spotlight.InnerConeAngleInDegrees = 0f;
             spotlight.OuterConeAngleInDegrees = 35f;
             spotlight.InnerConeColor = Colors.Black;
             spotlight.OuterConeColor = Colors.Black;
-            spotlight.ConstantAttenuation = 3f;
-            spotlight.LinearAttenuation = 0f;
-            spotlight.QuadraticAttenuation = 2f;
+            spotlight.ConstantAttenuation = 2f;
+            spotlight.LinearAttenuation = 3f;
+            spotlight.QuadraticAttenuation = 0f;
             CompositionLight = spotlight;
 
             spotlight.StartAnimation("Offset", OffsetAnimation);
@@ -53,10 +52,21 @@ namespace FluentDesignSystem.Lights
             HeightAnimation.InsertExpressionKeyFrame(0f, "this.StartingValue", cbEasing);
             HeightAnimation.InsertKeyFrame(1f, 500f, cbEasing);
             HeightAnimation.StopBehavior = AnimationStopBehavior.LeaveCurrentValue;
+        }
 
-            LinearAttenuationAnimation = compositor.CreateExpressionAnimation("PropSet.height / 1600");
-            LinearAttenuationAnimation.SetReferenceParameter("PropSet", propSet);
-            CompositionLight.StartAnimation("LinearAttenuation", LinearAttenuationAnimation);
+        protected override void OnDisconnected(UIElement oldElement)
+        {
+            base.OnDisconnected(oldElement);
+            CompositionLight.StopAnimation("InnerConeColor");
+            CompositionLight.StopAnimation("OuterConeColor");
+            cbEasing.Dispose();
+            cbEasing = null;
+            line.Dispose();
+            line = null;
+            ColorAnimation.Dispose();
+            ColorAnimation = null;
+            HeightAnimation.Dispose();
+            HeightAnimation = null;
         }
 
         protected override string GetId()
@@ -74,8 +84,6 @@ namespace FluentDesignSystem.Lights
             get { return (bool)GetValue(IsPressedProperty); }
             set { SetValue(IsPressedProperty, value); }
         }
-
-        // Using a DependencyProperty as the backing store for IsPressed.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty IsPressedProperty =
             DependencyProperty.Register("IsPressed", typeof(bool), typeof(RevealContentPressedLight), new PropertyMetadata(null, (s, a) =>
             {
@@ -83,28 +91,30 @@ namespace FluentDesignSystem.Lights
                 {
                     var IsPressed = (bool)a.NewValue;
                     var sender = s as RevealContentPressedLight;
-
-                    if (IsPressed)
+                    if (sender.IsConnected)
                     {
-                        sender.HeightAnimation.Duration = TimeSpan.FromSeconds(2d);
-                        sender.ColorAnimation.Duration = TimeSpan.FromSeconds(2d);
-                        ((SpotLight)sender.CompositionLight).InnerConeColor = Colors.FloralWhite;
-                        ((SpotLight)sender.CompositionLight).OuterConeColor = Colors.FloralWhite;
-                        sender.propSet.InsertScalar("height", 50f);
-                        sender.propSet.StartAnimation("height", sender.HeightAnimation);
-                        sender.CompositionLight.StartAnimation("InnerConeColor", sender.ColorAnimation);
-                        sender.CompositionLight.StartAnimation("OuterConeColor", sender.ColorAnimation);
-                    }
-                    else
-                    {
-                        sender.propSet.StopAnimation("height");
-                        sender.CompositionLight.StopAnimation("InnerConeColor");
-                        sender.CompositionLight.StopAnimation("OuterConeColor");
-                        sender.HeightAnimation.Duration = TimeSpan.FromSeconds(0.3d);
-                        sender.ColorAnimation.Duration = TimeSpan.FromSeconds(0.3d);
-                        sender.propSet.StartAnimation("height", sender.HeightAnimation);
-                        sender.CompositionLight.StartAnimation("InnerConeColor", sender.ColorAnimation);
-                        sender.CompositionLight.StartAnimation("OuterConeColor", sender.ColorAnimation);
+                        if (IsPressed)
+                        {
+                            sender.HeightAnimation.Duration = TimeSpan.FromSeconds(2d);
+                            sender.ColorAnimation.Duration = TimeSpan.FromSeconds(2d);
+                            ((SpotLight)sender.CompositionLight).InnerConeColor = Colors.FloralWhite;
+                            ((SpotLight)sender.CompositionLight).OuterConeColor = Colors.FloralWhite;
+                            sender.propSet.InsertScalar("height", 50f);
+                            sender.propSet.StartAnimation("height", sender.HeightAnimation);
+                            sender.CompositionLight.StartAnimation("InnerConeColor", sender.ColorAnimation);
+                            sender.CompositionLight.StartAnimation("OuterConeColor", sender.ColorAnimation);
+                        }
+                        else
+                        {
+                            sender.propSet.StopAnimation("height");
+                            sender.CompositionLight.StopAnimation("InnerConeColor");
+                            sender.CompositionLight.StopAnimation("OuterConeColor");
+                            sender.HeightAnimation.Duration = TimeSpan.FromSeconds(0.3d);
+                            sender.ColorAnimation.Duration = TimeSpan.FromSeconds(0.3d);
+                            sender.propSet.StartAnimation("height", sender.HeightAnimation);
+                            sender.CompositionLight.StartAnimation("InnerConeColor", sender.ColorAnimation);
+                            sender.CompositionLight.StartAnimation("OuterConeColor", sender.ColorAnimation);
+                        }
                     }
                 }
             }));

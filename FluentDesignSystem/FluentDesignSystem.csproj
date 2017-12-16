@@ -115,7 +115,6 @@
     <Compile Include="Brushes\RevealBrushState.cs" />
     <Compile Include="Helper\RevealBrushHelper.cs" />
     <Compile Include="Helper\RevealBrushHelperState.cs" />
-    <Compile Include="Helper\VisualTree.cs" />
     <Compile Include="Lights\LightCollection.cs" />
     <Compile Include="Lights\RevealAmbientLight.cs" />
     <Compile Include="Lights\RevealBorderSpotLight.cs" />
